@@ -1,62 +1,113 @@
-def out_of_range(x):
-    if(x > MATRIX_UPPER_LIMIT or x < MATRIX_LOWER_LIMIT):
-        return True
-    return False
+result = 0
 
-def chars_between(word, line_start, char_start, line_end, char_end):
-    print(f"Search limits {line_start}/{char_start} - {line_end}/{char_end}")
-    if(out_of_range(line_start) or out_of_range(char_start) or out_of_range(line_end) or out_of_range(char_end)):
-        print(f"Index out of range")
+def search_l(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            if(idx_char-i < 0):
+                return ""
+            chars += lines[idx_line][idx_char-i]
+        return chars
+    except:
         return ""
-    # swap start and end if they are wrong order
-    is_swap = False
-    if(line_start > line_end):
-        is_swap = True
-        line_end, line_start = line_start, line_end
-    if(char_start > char_end):
-        is_swap = True
-        char_end, char_start = char_start, char_end
-    chars = ""
-    if(char_start == char_end):
-        for i in range(line_start,line_end):
-            chars += lines[i][char_start]
-        if(is_swap):
-            return chars[::-1]
+
+def search_r(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            chars += lines[idx_line][idx_char+i]
         return chars
-    if(line_start == line_end):
-        for i in range(char_start, char_end):
-            chars += lines[line_start][i]
-        if(is_swap):
-            return chars[::-1]
+    except:
+        return ""
+
+def search_u(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            if(idx_line-i < 0):
+                return ""
+            chars += lines[idx_line-i][idx_char]
         return chars
+    except:
+        return ""
+
+def search_d(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            chars += lines[idx_line+i][idx_char]
+        return chars
+    except:
+        return ""
+    
+def search_ur(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            if(idx_line-i < 0):
+                return ""
+            chars += lines[idx_line-i][idx_char+i]
+        return chars
+    except:
+        return ""
+
+def search_dr(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            chars += lines[idx_line+i][idx_char+i]
+        return chars
+    except:
+        return ""
+
+def search_dl(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            if(idx_char-i < 0):
+                return ""
+            chars += lines[idx_line+i][idx_char-i]
+        return chars
+    except:
+        return ""
+
+def search_ul(word, idx_line, idx_char):
+    try:
+        chars = ""
+        for i in range(1,len(word)):
+            if(idx_line-i < 0 or idx_char-i < 0):
+                return ""
+            chars += lines[idx_line-i][idx_char-i]
+        return chars
+    except:
+        return ""
+
+def handle_chars_found(word, chars):
+    global result
+    print(f"Check {chars}")
+    for chr in chars:
+        if chr == word[1:]:
+            print(f"Match {chr}")
+            result += 1
 
 
 def search_for_word(word, idx_line, idx_char):
-    #print(f"Searching for {word} @ {idx_line}/{idx_char}")
-    ## look up
-    #chars = chars_between(word, idx_line, idx_char, idx_line-len(word)+1, idx_char)
-    #if(len(chars) > 0):
-    #    print(f"UP Found {chars}")
-    ## look down
-    #chars = chars_between(word, idx_line+1, idx_char, idx_line+len(word), idx_char)
-    #if(len(chars) > 0):
-    #    print(f"DOWN Found {chars}")
-    ##look left
-    #chars = chars_between(word, idx_line, idx_char, idx_line, idx_char-len(word)+1)
-    #if(len(chars) > 0):
-    #    print(f"LEFT Found {chars}")
-    ##look right
-    #chars = chars_between(word, idx_line, idx_char+1, idx_line, idx_char+len(word))
-    #if(len(chars) > 0):
-    #    print(f"RIGHT Found {chars}")
-    #look top/right
-    chars = chars_between(word, idx_line-1, idx_char+1, idx_line-len(word), idx_char+len(word))
+    print(f"Searching for {word} @ {lines[idx_line][idx_char]} {idx_line}/{idx_char}")
+    results = []
+    results.append(search_u(word, idx_line, idx_char))
+    results.append(search_d(word, idx_line, idx_char))
+    results.append(search_l(word, idx_line, idx_char))
+    results.append(search_ul(word, idx_line, idx_char))
+    results.append(search_dl(word, idx_line, idx_char))    
+    results.append(search_r(word, idx_line, idx_char))
+    results.append(search_ur(word, idx_line, idx_char))
+    results.append(search_dr(word, idx_line, idx_char))
+    
+    handle_chars_found(word, results)
+
 
 
 searchword = "XMAS"
-
-MATRIX_LOWER_LIMIT = 0
-MATRIX_UPPER_LIMIT = 140
 
 f = open("input04.txt", "r")
 input = f.read()
@@ -66,3 +117,4 @@ for idx_line,line in enumerate(lines):
     for idx_char,char in enumerate(line):
         if(char == searchword[0]):
             search_for_word(searchword,idx_line,idx_char)
+print(f"Result is {result}")
